@@ -4,7 +4,6 @@ import com.ibrakhim2906.task_manager.models.Task;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.management.RuntimeErrorException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,12 +19,24 @@ public class TaskRepository {
         return task;
     }
 
+    public Map<Long, Task> getAll() {
+        return repo;
+    }
+
     public Task get(Long id) {
         Task req = repo.get(id);
         if (req==null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found");
         }
         return req;
+    }
+
+    public Task update(Long id, Task task) {
+        if (!repo.containsKey(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found");
+        }
+        repo.put(id, task);
+        return repo.get(id);
     }
 
     public void delete(Long id) {
