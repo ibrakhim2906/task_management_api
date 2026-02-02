@@ -28,12 +28,10 @@ public class TaskService {
 
         return taskRepository.save(task);
     }
-
     public Task get(Long id) {
         return taskRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found"));
     }
-
     public List<Task> getAll() {
         return taskRepository.findAll();
     }
@@ -56,7 +54,6 @@ public class TaskService {
 
         return existing;
     }
-
     public void delete(Long id) {
         if (!taskRepository.existsById(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);

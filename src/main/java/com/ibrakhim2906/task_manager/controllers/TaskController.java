@@ -59,7 +59,4 @@ public class TaskController {
     public void delete(@PathVariable Long id) {
         taskService.delete(id);
     }
-
-
-
 }
