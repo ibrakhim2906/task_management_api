@@ -1,18 +1,29 @@
 package com.ibrakhim2906.task_manager.models;
 
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
 
 import java.time.LocalDateTime;
 
+@Entity
+@Table(name="tasks")
 public class Task {
+    @Column
     @NotBlank
     private String details;
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column
     private boolean completed;
+
+    @Column
     private LocalDateTime createdAt;
 
+    @Column
     @Future(message = "The due date should be set later")
     private LocalDateTime dueDate;
 
