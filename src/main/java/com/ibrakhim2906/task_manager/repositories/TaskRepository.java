@@ -2,11 +2,13 @@ package com.ibrakhim2906.task_manager.repositories;
 
 import com.ibrakhim2906.task_manager.models.Task;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Repository;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Repository
 public class TaskRepository {
     Map<Long, Task> repo;
 
