@@ -38,6 +38,14 @@ public class TaskService {
         return taskRepository.findAll();
     }
 
+    public List<Task> getCompletedTasks() {
+        return taskRepository.findByCompleted(true);
+    }
+
+    public List<Task> getOverdueTasks() {
+        return taskRepository.findByDueDateBefore(LocalDateTime.now());
+    }
+
     @Transactional
     public Task update(Long id, Task task) {
         Task existing = taskRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
@@ -51,7 +59,7 @@ public class TaskService {
 
     public void delete(Long id) {
         if (!taskRepository.existsById(id)) {
-            throw new RuntimeException("Task not found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
         taskRepository.deleteById(id);
     }

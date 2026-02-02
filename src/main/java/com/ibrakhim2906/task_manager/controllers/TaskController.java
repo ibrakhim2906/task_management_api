@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collection;
+import java.util.List;
 
 @RestController
 @RequestMapping("/tasks")
@@ -34,8 +34,18 @@ public class TaskController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public Collection<Task> getAll() {
+    public List<Task> getAll() {
         return taskService.getAll();
+    }
+
+    @GetMapping("/completed")
+    @ResponseStatus(HttpStatus.OK)
+    public List<Task> getCompletedTasks() { return taskService.getCompletedTasks();}
+
+    @GetMapping("/overdue")
+    @ResponseStatus(HttpStatus.OK)
+    public List<Task> overdue() {
+        return taskService.getOverdueTasks();
     }
 
     @PutMapping("/{id}")
