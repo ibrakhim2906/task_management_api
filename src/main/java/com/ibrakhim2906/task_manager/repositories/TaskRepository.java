@@ -36,7 +36,7 @@ public class TaskRepository {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found");
         }
         repo.put(id, task);
-        return repo.get(id);
+        return task;
     }
 
     public void delete(Long id) {

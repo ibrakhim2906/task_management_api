@@ -3,11 +3,12 @@ package com.ibrakhim2906.task_manager.services;
 
 import com.ibrakhim2906.task_manager.models.Task;
 import com.ibrakhim2906.task_manager.repositories.TaskRepository;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/tasks")
@@ -22,8 +23,11 @@ public class TaskService {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Task add(@RequestBody Task task) {
+    public Task add(@Valid @RequestBody Task task) {
         task.setId(idCounter++);
+        task.setCreatedAt(LocalDateTime.now());
+        task.setStatus(false);
+
         taskRepository.save(task);
         return task;
     }
@@ -36,8 +40,8 @@ public class TaskService {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public Map<Long, Task> getAll() {
-        return taskRepository.getAll();
+    public Collection<Task> getAll() {
+        return taskRepository.getAll().values();
     }
 
     @PutMapping("/{id}")
