@@ -9,13 +9,13 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name="tasks")
 public class Task {
-    @Column
-    @NotBlank
-    private String details;
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column
+    @NotBlank
+    private String details;
 
     @Column
     private boolean completed;
@@ -24,7 +24,6 @@ public class Task {
     private LocalDateTime createdAt;
 
     @Column
-    @Future(message = "The due date should be set later")
     private LocalDateTime dueDate;
 
     public Task() {

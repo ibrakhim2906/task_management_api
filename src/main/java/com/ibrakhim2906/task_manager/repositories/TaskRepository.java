@@ -5,10 +5,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Collection;
 
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Long> {
-    List<Task> findByCompleted(boolean completed);
-    List<Task> findByDueDateBefore(LocalDateTime date);
+    Collection<Task> findByCompleted(boolean completed);
+    Collection<Task> findByDueDateBefore(LocalDateTime date);
 }
