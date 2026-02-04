@@ -1,8 +1,6 @@
 package com.ibrakhim2906.task_manager.models;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Future;
-import jakarta.validation.constraints.NotBlank;
 
 import java.time.LocalDateTime;
 
@@ -13,8 +11,7 @@ public class Task {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
-    @NotBlank
+    @Column(nullable = false)
     private String details;
 
     @Column
@@ -23,8 +20,20 @@ public class Task {
     @Column
     private LocalDateTime createdAt;
 
+    @Column LocalDateTime updatedAt;
+
     @Column
     private LocalDateTime dueDate;
+
+    @PrePersist
+    public void prePersist() {
+        this.createdAt= LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt=LocalDateTime.now();
+    }
 
     public Task() {
     }
@@ -69,7 +78,7 @@ public class Task {
         this.dueDate=dueDate;
     }
 
-    public void setStatus(boolean status) {
+    public void setCompleted(boolean status) {
         this.completed=status;
     }
 }

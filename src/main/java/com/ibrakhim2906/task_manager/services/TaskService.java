@@ -1,6 +1,7 @@
 package com.ibrakhim2906.task_manager.services;
 
 
+import com.ibrakhim2906.task_manager.dtos.TaskResponse;
 import com.ibrakhim2906.task_manager.exceptions.InvalidTaskStateException;
 import com.ibrakhim2906.task_manager.exceptions.TaskNotFoundException;
 import com.ibrakhim2906.task_manager.models.Task;
@@ -24,54 +25,59 @@ public class TaskService {
         this.taskRepository = taskRepository;
     }
 
-    public Task add(String details) {
+    public TaskResponse add(String details) {
         Task task = new Task();
         task.setDetails(details);
-        task.setCreatedAt(LocalDateTime.now());
-        task.setStatus(false);
+        task.setCompleted(false);
+        taskRepository.save(task);
 
-        return taskRepository.save(task);
+        return TaskResponse.from(task);
     }
-    public Task get(Long id) {
-        return taskRepository.findById(id)
+    public TaskResponse get(Long id) {
+        Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new TaskNotFoundException(id));
+        return TaskResponse.from(task);
     }
-    public Collection<Task> getAll() {
-        return taskRepository.findAll();
-    }
-
-    public Collection<Task> getCompletedTasks() {
-        return taskRepository.findByCompleted(true);
+    public Collection<TaskResponse> getAll() {
+        Collection<Task> tasks = taskRepository.findAll();
+        return tasks.stream().map(TaskResponse::from).toList();
     }
 
-    public Collection<Task> getOverdueTasks() {
-        return taskRepository.findByDueDateBefore(LocalDateTime.now());
+    public Collection<TaskResponse> getCompletedTasks() {
+        Collection<Task> tasks = taskRepository.findByCompleted(true);
+        return tasks.stream().map(TaskResponse::from).toList();
+    }
+
+    public Collection<TaskResponse> getOverdueTasks() {
+        Collection<Task> tasks = taskRepository.findByDueDateBefore(LocalDateTime.now());
+        return tasks.stream().map(TaskResponse::from).toList();
     }
 
     @Transactional
-    public Task update(Long id, String details) {
+    public TaskResponse update(Long id, String details) {
         Task existing = taskRepository.findById(id).orElseThrow(() -> new TaskNotFoundException(id));
 
         existing.setDetails(details);
-        return existing;
+
+        return TaskResponse.from(existing);
     }
 
     @Transactional
-    public Task updateStatus(Long id) {
+    public TaskResponse updateStatus(Long id) {
         Task existing = taskRepository.findById(id).orElseThrow(() -> new TaskNotFoundException(id));
 
         if (existing.isCompleted()) {
             throw new InvalidTaskStateException(id);
         }
 
-        existing.setStatus(true);
+        existing.setCompleted(true);
 
-        return existing;
+        return TaskResponse.from(existing);
     }
 
     public void delete(Long id) {
         if (!taskRepository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            throw new TaskNotFoundException(id);
         }
         taskRepository.deleteById(id);
     }
