@@ -11,8 +11,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collection;
-
 @RestController
 @RequestMapping("/tasks")
 public class TaskController {
@@ -38,7 +36,7 @@ public class TaskController {
     @GetMapping
     public Page<TaskResponse> getAll(@RequestParam(required = false) Boolean completed,
                                      @RequestParam(required = false) Boolean overdue,
-                                     @PageableDefault(size = 10) Pageable pageable) {
+                                     @PageableDefault(size = 10, sort = "createdAt") Pageable pageable) {
         return taskService.getTasks(completed, overdue, pageable);
     }
 

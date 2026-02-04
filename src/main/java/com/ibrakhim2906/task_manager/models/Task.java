@@ -20,7 +20,8 @@ public class Task {
     @Column
     private LocalDateTime createdAt;
 
-    @Column LocalDateTime updatedAt;
+    @Column
+    private LocalDateTime updatedAt;
 
     @Column
     private LocalDateTime dueDate;

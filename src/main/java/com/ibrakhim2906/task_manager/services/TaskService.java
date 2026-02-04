@@ -55,7 +55,7 @@ public class TaskService {
 
     public Page<TaskResponse> getTasks(Boolean completed, Boolean overdue, Pageable pageable) {
         if (Boolean.TRUE.equals(overdue)) {
-            return taskRepository.findByDueDateBefore(LocalDateTime.now(), pageable).map(TaskResponse::from);
+            return taskRepository.findByCompletedFalseAndDueDateBefore(LocalDateTime.now(), pageable).map(TaskResponse::from);
         }
 
         if (completed!=null) {
