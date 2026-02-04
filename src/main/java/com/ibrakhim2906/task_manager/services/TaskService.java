@@ -8,9 +8,9 @@ import com.ibrakhim2906.task_manager.models.Task;
 import com.ibrakhim2906.task_manager.repositories.TaskRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -33,6 +33,16 @@ public class TaskService {
 
         return TaskResponse.from(task);
     }
+
+    public TaskResponse add(String details, LocalDateTime dueDate) {
+        Task task = new Task();
+        task.setDetails(details);
+        task.setDueDate(dueDate);
+        task.setCompleted(false);
+        taskRepository.save(task);
+        return TaskResponse.from(task);
+    }
+
     public TaskResponse get(Long id) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new TaskNotFoundException(id));
@@ -43,14 +53,22 @@ public class TaskService {
         return tasks.stream().map(TaskResponse::from).toList();
     }
 
-    public Collection<TaskResponse> getCompletedTasks() {
-        Collection<Task> tasks = taskRepository.findByCompleted(true);
-        return tasks.stream().map(TaskResponse::from).toList();
+    public Page<TaskResponse> getTasks(Boolean completed, Boolean overdue, Pageable pageable) {
+        if (Boolean.TRUE.equals(overdue)) {
+            return taskRepository.findByDueDateBefore(LocalDateTime.now(), pageable).map(TaskResponse::from);
+        }
+
+        if (completed!=null) {
+            return taskRepository.findByCompleted(completed, pageable).map(TaskResponse::from);
+        }
+
+        return taskRepository.findAll(pageable).map(TaskResponse::from);
+
+
     }
 
-    public Collection<TaskResponse> getOverdueTasks() {
-        Collection<Task> tasks = taskRepository.findByDueDateBefore(LocalDateTime.now());
-        return tasks.stream().map(TaskResponse::from).toList();
+    private TaskRepository getTaskRepository() {
+        return taskRepository;
     }
 
     @Transactional

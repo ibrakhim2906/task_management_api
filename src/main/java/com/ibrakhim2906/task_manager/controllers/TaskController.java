@@ -2,10 +2,12 @@ package com.ibrakhim2906.task_manager.controllers;
 
 import com.ibrakhim2906.task_manager.dtos.TaskRequest;
 import com.ibrakhim2906.task_manager.dtos.TaskResponse;
-import com.ibrakhim2906.task_manager.models.Task;
 import com.ibrakhim2906.task_manager.services.TaskService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,7 +27,7 @@ public class TaskController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public TaskResponse add(@Valid @RequestBody TaskRequest req) {
-        return taskService.add(req.details());
+        return taskService.add(req.details(), req.dueDate());
     }
 
     @GetMapping("/{id}")
@@ -34,18 +36,10 @@ public class TaskController {
     }
 
     @GetMapping
-    public Collection<TaskResponse> getAll() {
-        return taskService.getAll();
-    }
-
-    @GetMapping("/completed")
-    public Collection<TaskResponse> getCompletedTasks() {
-        return taskService.getCompletedTasks();
-    }
-
-    @GetMapping("/overdue")
-    public Collection<TaskResponse> overdue() {
-        return taskService.getOverdueTasks();
+    public Page<TaskResponse> getAll(@RequestParam(required = false) Boolean completed,
+                                     @RequestParam(required = false) Boolean overdue,
+                                     @PageableDefault(size = 10) Pageable pageable) {
+        return taskService.getTasks(completed, overdue, pageable);
     }
 
     @PutMapping("/{id}")
