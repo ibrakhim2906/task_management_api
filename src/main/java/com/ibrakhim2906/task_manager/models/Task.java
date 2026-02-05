@@ -14,8 +14,12 @@ public class Task {
     @Column(nullable = false)
     private String details;
 
-    @Column
+    @Column(nullable = false)
     private boolean completed;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name="owner_id", nullable = false)
+    private User owner;
 
     @Column
     private LocalDateTime createdAt;
@@ -59,6 +63,8 @@ public class Task {
         return dueDate;
     }
 
+    public User getOwner() {    return owner;}
+
     public boolean isCompleted() {
         return completed;
     }
@@ -82,4 +88,6 @@ public class Task {
     public void setCompleted(boolean status) {
         this.completed=status;
     }
+
+    public void setOwner(User owner) { this.owner = owner;}
 }
