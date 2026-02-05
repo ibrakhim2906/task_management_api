@@ -28,6 +28,11 @@ public class User {
 
     public User() {}
 
+    public User(String email, String passwordHash) {
+        this.email=email;
+        this.passwordHash=passwordHash;
+    }
+
     public Long getId() {
         return id;
     }
