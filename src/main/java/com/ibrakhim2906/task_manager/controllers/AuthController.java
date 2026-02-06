@@ -1,5 +1,7 @@
 package com.ibrakhim2906.task_manager.controllers;
 
+import com.ibrakhim2906.task_manager.dtos.LoginRequest;
+import com.ibrakhim2906.task_manager.dtos.LoginResponse;
 import com.ibrakhim2906.task_manager.dtos.RegisterRequest;
 import com.ibrakhim2906.task_manager.dtos.RegisterResponse;
 import com.ibrakhim2906.task_manager.services.AuthService;
@@ -21,5 +23,11 @@ public class AuthController {
     @ResponseStatus(HttpStatus.CREATED)
     public RegisterResponse register(@Valid @RequestBody RegisterRequest req) {
         return authService.register(req.email(), req.password());
+    }
+
+    @PostMapping("/login")
+    @ResponseStatus(HttpStatus.OK)
+    public LoginResponse login(@Valid @RequestBody LoginRequest req) {
+        return authService.login(req.email(), req.password());
     }
 }
