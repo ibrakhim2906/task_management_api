@@ -2,6 +2,8 @@ package com.ibrakhim2906.task_manager.controllers;
 
 import com.ibrakhim2906.task_manager.dtos.TaskRequest;
 import com.ibrakhim2906.task_manager.dtos.TaskResponse;
+import com.ibrakhim2906.task_manager.dtos.TaskStatusRequest;
+import com.ibrakhim2906.task_manager.models.enums.TaskStatus;
 import com.ibrakhim2906.task_manager.services.TaskService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +27,7 @@ public class TaskController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public TaskResponse add(@Valid @RequestBody TaskRequest req) {
-        return taskService.add(req.details(), req.dueDate());
+        return taskService.add(req.details(), req.dueDate(), req.status());
     }
 
     @GetMapping("/{id}")
@@ -34,10 +36,10 @@ public class TaskController {
     }
 
     @GetMapping
-    public Page<TaskResponse> getAll(@RequestParam(required = false) Boolean completed,
+    public Page<TaskResponse> getAll(@RequestParam(required = false) TaskStatus status,
                                      @RequestParam(required = false) Boolean overdue,
                                      @PageableDefault(size = 10, sort = "createdAt") Pageable pageable) {
-        return taskService.getTasks(completed, overdue, pageable);
+        return taskService.getTasks(status, overdue, pageable);
     }
 
     @PutMapping("/{id}")
@@ -45,9 +47,9 @@ public class TaskController {
         return taskService.update(id, req.details());
     }
 
-    @PutMapping("/{id}/complete")
-    public TaskResponse updateStatus(@PathVariable Long id) {
-        return taskService.updateStatus(id);
+    @PutMapping("/{id}/status/set")
+    public TaskResponse updateStatus(@PathVariable Long id, @Valid @RequestBody TaskStatusRequest req) {
+        return taskService.updateStatus(id, req.status());
     }
 
     @DeleteMapping("/{id}")

@@ -1,6 +1,8 @@
 package com.ibrakhim2906.task_manager.models;
 
+import com.ibrakhim2906.task_manager.models.enums.TaskStatus;
 import jakarta.persistence.*;
+import org.springframework.cglib.core.Local;
 
 import java.time.LocalDateTime;
 
@@ -14,8 +16,9 @@ public class Task {
     @Column(nullable = false)
     private String details;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private boolean completed;
+    private TaskStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name="owner_id", nullable = false)
@@ -32,7 +35,12 @@ public class Task {
 
     @PrePersist
     public void prePersist() {
+
         this.createdAt= LocalDateTime.now();
+        this.updatedAt= LocalDateTime.now();
+        if (this.status==null) {
+            this.status=TaskStatus.TODO;
+        }
     }
 
     @PreUpdate
@@ -65,8 +73,8 @@ public class Task {
 
     public User getOwner() {    return owner;}
 
-    public boolean isCompleted() {
-        return completed;
+    public TaskStatus getStatus() {
+        return status;
     }
 
     public void setId(Long id) {
@@ -85,8 +93,26 @@ public class Task {
         this.dueDate=dueDate;
     }
 
-    public void setCompleted(boolean status) {
-        this.completed=status;
+    public void setStatus(TaskStatus status) {
+        if (status == TaskStatus.IN_PROGRESS) {
+            this.setInProgress();
+        } else if (status == TaskStatus.DONE) {
+            this.setCompleted();
+        } else if (status == TaskStatus.TODO) {
+            this.setToDo();
+        }
+    }
+
+    public void setCompleted() {
+        status=TaskStatus.DONE;
+    }
+
+    public void setInProgress() {
+        status=TaskStatus.IN_PROGRESS;
+    }
+
+    public void setToDo() {
+        status=TaskStatus.TODO;
     }
 
     public void setOwner(User owner) { this.owner = owner;}
