@@ -24,7 +24,7 @@ public class Task {
     @JoinColumn(name="owner_id", nullable = false)
     private User owner;
 
-    @Column
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 
     @Column

@@ -47,7 +47,7 @@ public class TaskController {
         return taskService.update(id, req.details());
     }
 
-    @PutMapping("/{id}/status/set")
+    @PutMapping("/{id}/status")
     public TaskResponse updateStatus(@PathVariable Long id, @Valid @RequestBody TaskStatusRequest req) {
         return taskService.updateStatus(id, req.status());
     }
