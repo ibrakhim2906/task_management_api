@@ -100,12 +100,19 @@ public class TaskService {
     }
 
     @Transactional
-    public TaskResponse update(Long id, String details) {
+    public TaskResponse update(Long id, String details, LocalDateTime dueDate, TaskStatus taskStatus) {
         User me = requireCurrentUser();
 
         Task existing = taskRepository.findByIdAndOwner(id, me).orElseThrow(() -> new TaskNotFoundException(id));
 
+        if (dueDate.isBefore(LocalDateTime.now())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Due date cannot be in the past");
+        }
+
         existing.setDetails(details);
+        existing.setDueDate(dueDate);
+        existing.setStatus(taskStatus);
+
 
         return TaskResponse.from(existing);
     }

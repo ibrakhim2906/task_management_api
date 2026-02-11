@@ -9,6 +9,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDateTime;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -74,6 +76,22 @@ abstract class HelperIntegrationTest {
         JsonNode json = mapper.readTree(response);
         return json.get("id").asLong();
     }
+
+    protected void createTask(String token, String details, LocalDateTime dueDate, String taskStatus) throws Exception {
+        mockMvc.perform(post("/tasks")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "details" : "%s",
+                                    "dueDate" : "%s",
+                                    "status" : "%s"
+                                }
+                                """.formatted(details, dueDate, taskStatus)))
+                .andExpect(status().isCreated());
+    }
+
+
 
     // Update Task HELPER
     protected void updateTask(String token, Long taskId) throws Exception {

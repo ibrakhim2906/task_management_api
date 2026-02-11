@@ -36,7 +36,7 @@ public class TaskController {
     }
 
     @GetMapping
-    public Page<TaskResponse> getAll(@RequestParam(required = false) TaskStatus status,
+    public Page<TaskResponse> getTasks(@RequestParam(required = false) TaskStatus status,
                                      @RequestParam(required = false) Boolean overdue,
                                      @PageableDefault(size = 10, sort = "createdAt") Pageable pageable) {
         return taskService.getTasks(status, overdue, pageable);
@@ -44,7 +44,7 @@ public class TaskController {
 
     @PutMapping("/{id}")
     public TaskResponse update(@PathVariable Long id, @Valid @RequestBody TaskRequest req) {
-        return taskService.update(id, req.details());
+        return taskService.update(id, req.details(), req.dueDate(), req.status());
     }
 
     @PutMapping("/{id}/status")
