@@ -2,7 +2,7 @@
 
 task management rest api with jwt authentication, ownership isolation and task lifecycle.
 
-tech stack implemented - java 17+ (for lambda expressions), spring (boot, security, data jpa/hibernate), postgresql, flyway,
+tech stack implemented - java 17+, spring (boot, security, data jpa/hibernate), postgresql, flyway,
 h2 (testing). build helper - maven.
 
 features: user register/login with jwt, tasks crud (proper task workflow included).
