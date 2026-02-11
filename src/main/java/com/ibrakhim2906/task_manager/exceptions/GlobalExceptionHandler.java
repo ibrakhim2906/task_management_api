@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -30,11 +31,72 @@ public class GlobalExceptionHandler {
     ) {
         ErrorResponse body = new ErrorResponse(
                 409,
-                "BAD REQUEST",
+                "CONFLICT",
                 ex.getMessage(),
                 req.getRequestURI()
         );
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
     }
+
+    @ExceptionHandler(InvalidValuesException.class)
+    public ResponseEntity<ErrorResponse> handleValidation(
+            InvalidValuesException ex,
+            HttpServletRequest req
+    ) {
+        ErrorResponse body = new ErrorResponse(
+                400,
+                "BAD REQUEST",
+                ex.getMessage(),
+                req.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+    @ExceptionHandler(InvalidJsonRequestException.class)
+    public ResponseEntity<ErrorResponse> handleBadJsonRequest(
+            InvalidJsonRequestException ex,
+            HttpServletRequest req
+    ) {
+        ErrorResponse body = new ErrorResponse(
+                400,
+                "BAD REQUEST",
+                ex.getMessage(),
+                req.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ErrorResponse> reformatResponseStatusException(
+            ResponseStatusException ex,
+            HttpServletRequest req
+    ) {
+        ErrorResponse body = new ErrorResponse(
+                ex.getStatusCode().value(),
+                ex.getStatusCode().toString(),
+                "Request failed",
+                req.getRequestURI()
+        );
+
+        return ResponseEntity.status(ex.getStatusCode()).body(body);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> fallbackHandler(
+            Exception ex,
+            HttpServletRequest req
+    ) {
+        ErrorResponse body = new ErrorResponse(
+                500,
+                "INTERNAL SERVER ERROR",
+                "Internal server error",
+                req.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
+    }
+
 }

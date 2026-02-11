@@ -8,10 +8,8 @@ import com.ibrakhim2906.task_manager.repositories.TaskRepository;
 import com.ibrakhim2906.task_manager.repositories.UserRepository;
 import com.ibrakhim2906.task_manager.security.CurrentUser;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
