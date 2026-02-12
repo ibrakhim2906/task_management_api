@@ -9,6 +9,37 @@ features: user register/login with jwt, tasks crud (proper task workflow include
 db data access/modification is being optimized via pagination and filtering. flyway is being used for proper db migration.
 
 ## documentation
+### how to run it
+
+clone repository
+
+```bash
+git clone https://github.com/ibrakhim2906/task_management_api.git <p>
+cd task_management_api
+```
+
+set environmental variables
+
+```bash
+export JWT_SECRET=your-32-character-secret-key-here
+export DB_URL=jdbc:postgresql://localhost:5432/taskdb
+export DB_USER=postgres
+export DB_PASSWORD=yourpassword
+```
+
+run the application
+```bash
+mvn spring-boot:run
+```
+
+access swagger ui
+```bash
+http://localhost:8080/swagger-ui.html
+```
+
+
+
+
 ### api overview
 
 users: <p>
