@@ -5,6 +5,7 @@ import com.ibrakhim2906.task_manager.models.User;
 import com.ibrakhim2906.task_manager.models.enums.TaskStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -15,9 +16,12 @@ import java.util.Optional;
 public interface TaskRepository extends JpaRepository<Task, Long> {
     Optional<Task> findByIdAndOwner(Long id, User owner);
 
+    @EntityGraph(attributePaths = {"owner"})
     Page<Task> findByOwner(User user, Pageable pageable);
 
+    @EntityGraph(attributePaths = {"owner"})
     Page<Task> findByOwnerAndStatus(User user, TaskStatus status, Pageable pageable);
 
-    Page<Task> findByOwnerAndStatusNotAndDueDateBefore(User user,TaskStatus status, LocalDateTime date, Pageable pageable);
+    @EntityGraph(attributePaths = {"owner"})
+    Page<Task> findByOwnerAndStatusAndDueDateBefore(User user, TaskStatus status, LocalDateTime date, Pageable pageable);
 }

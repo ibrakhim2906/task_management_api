@@ -78,6 +78,19 @@ abstract class HelperIntegrationTest {
     }
 
     protected void createTask(String token, String details, LocalDateTime dueDate, String taskStatus) throws Exception {
+        if (details==null) {
+            mockMvc.perform(post("/tasks")
+                            .header("Authorization", "Bearer " + token)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                {
+                                    "details" : "",
+                                    "dueDate" : "%s",
+                                    "status" : "%s"
+                                }
+                                """.formatted(dueDate, taskStatus)))
+                    .andExpect(status().isCreated());
+        }
         mockMvc.perform(post("/tasks")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -95,7 +108,7 @@ abstract class HelperIntegrationTest {
 
     // Update Task HELPER
     protected void updateTask(String token, Long taskId) throws Exception {
-        mockMvc.perform(put("/tasks/"+taskId+"/status")
+        mockMvc.perform(patch("/tasks/"+taskId+"/status")
                         .header("Authorization","Bearer "+token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""

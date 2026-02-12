@@ -24,6 +24,12 @@ public class AuthService {
         this.jwtService=jwtService;
     }
 
+    /**
+     * Register user
+     * @param email Email of the user
+     * @param password Password to be set (hashed version is actually going to database)
+     * @return Register response with user information that will be saved to DB
+     */
     public RegisterResponse register(String email, String password) {
         if (userRepository.findByEmail(email).isPresent()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already registered");
@@ -36,6 +42,12 @@ public class AuthService {
         return RegisterResponse.from(user);
     }
 
+    /**
+     * Login user
+     * @param email Email as mail authenticator of the specific user
+     * @param password Password of the user (BCrypt will check for matching of the hashed and given password)
+     * @return LoginResponse with token for authorization that allows to control specific user tasks
+     */
     public LoginResponse login(String email, String password) {
         User user = userRepository.findByEmail(email).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED)

@@ -36,20 +36,26 @@ public class TaskService {
 
     private User requireCurrentUser() {
         String email = CurrentUser.email();
+
         if (email == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authenticated");
         }
+
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
     }
 
-    //
-
+    /**
+     * Create new task for specific user (TaskStatus Defaults to TODO)
+     * @param details Task description
+     * @return TaskResponse containing created task information
+     */
     public TaskResponse add(String details) {
         User me = requireCurrentUser();
 
         Task task = new Task();
         task.setDetails(details);
+        task.setStatus(TaskStatus.TODO);
         task.setOwner(me);
 
         taskRepository.save(task);
@@ -58,6 +64,13 @@ public class TaskService {
 
     }
 
+    /**
+     * Create a task with more fields for task description filled out, user related
+     * @param details Task description
+     * @param dueDate Optional deadline for the task
+     * @param status Initial status (default TODO)
+     * @return TaskResponse with task information
+     */
     public TaskResponse add(String details, LocalDateTime dueDate, TaskStatus status) {
         User me = requireCurrentUser();
 
@@ -74,6 +87,11 @@ public class TaskService {
         return TaskResponse.from(task);
     }
 
+    /**
+     * Get single task
+     * @param id ID of the task needed
+     * @return TaskResponse with needed task
+     */
     public TaskResponse get(Long id) {
         User me = requireCurrentUser();
 
@@ -83,11 +101,18 @@ public class TaskService {
         return TaskResponse.from(task);
     }
 
+    /**
+     * Get paged multiple tasks (filtering with status, being task overdue)
+     * @param status Filtering parameter based on task
+     * @param overdue Filtering parameter based on task being past deadline and still have status TODO
+     * @param pageable Pagination
+     * @return Page of TaskResponse - list of tasks requested
+     */
     public Page<TaskResponse> getTasks(TaskStatus status, Boolean overdue, Pageable pageable) {
         User me = requireCurrentUser();
 
         if (Boolean.TRUE.equals(overdue)) {
-            return taskRepository.findByOwnerAndStatusNotAndDueDateBefore(me,TaskStatus.DONE,LocalDateTime.now(), pageable).map(TaskResponse::from);
+            return taskRepository.findByOwnerAndStatusAndDueDateBefore(me, TaskStatus.TODO, LocalDateTime.now(), pageable).map(TaskResponse::from);
         }
 
         if (status!=null) {
@@ -96,16 +121,23 @@ public class TaskService {
 
         return taskRepository.findByOwner(me, pageable).map(TaskResponse::from);
 
-
     }
 
+    /**
+     * Full replacement of the task with given information
+     * @param id Path variable to access specific tasks
+     * @param details Task information that should be put in
+     * @param dueDate DueDate information that should be put in
+     * @param taskStatus Task status information that should put in
+     * @return TaskResponse with information of updated task (same id)
+     */
     @Transactional
     public TaskResponse update(Long id, String details, LocalDateTime dueDate, TaskStatus taskStatus) {
         User me = requireCurrentUser();
 
         Task existing = taskRepository.findByIdAndOwner(id, me).orElseThrow(() -> new TaskNotFoundException(id));
 
-        if (dueDate.isBefore(LocalDateTime.now())) {
+        if (dueDate!=null && dueDate.isBefore(LocalDateTime.now())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Due date cannot be in the past");
         }
 
@@ -117,11 +149,18 @@ public class TaskService {
         return TaskResponse.from(existing);
     }
 
+    /**
+     * Updating status of the specific task
+     * @param id Path variable to access specific task
+     * @param status Desired status to be set
+     * @return TaskResponse with current status for requested task
+     */
     @Transactional
     public TaskResponse updateStatus(Long id, TaskStatus status) {
         User me = requireCurrentUser();
 
-        Task existing = taskRepository.findByIdAndOwner(id, me).orElseThrow(() -> new TaskNotFoundException(id));
+        Task existing = taskRepository.findByIdAndOwner(id, me)
+                .orElseThrow(() -> new TaskNotFoundException(id));
 
         if (existing.getStatus() == status) {
             throw new InvalidTaskStateException(id);
@@ -132,6 +171,10 @@ public class TaskService {
         return TaskResponse.from(existing);
     }
 
+    /**
+     * Delete specific user task based on ID
+     * @param id ID of the task to be deleted
+     */
     public void delete(Long id) {
         User me = requireCurrentUser();
 

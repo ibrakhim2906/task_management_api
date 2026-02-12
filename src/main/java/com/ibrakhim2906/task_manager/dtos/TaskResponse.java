@@ -1,6 +1,8 @@
 package com.ibrakhim2906.task_manager.dtos;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ibrakhim2906.task_manager.models.Task;
+import com.ibrakhim2906.task_manager.models.User;
 import com.ibrakhim2906.task_manager.models.enums.TaskStatus;
 
 import java.time.LocalDateTime;

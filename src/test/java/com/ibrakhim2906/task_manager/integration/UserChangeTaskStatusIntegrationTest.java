@@ -27,7 +27,5 @@ class UserChangeTaskStatusIntegrationTest extends HelperIntegrationTest{
         updateTask(token, taskId);
 
         getTaskAndCheckStatus(token, taskId);
-
     }
-
 }

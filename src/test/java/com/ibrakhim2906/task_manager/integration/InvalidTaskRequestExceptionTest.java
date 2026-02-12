@@ -2,7 +2,7 @@ package com.ibrakhim2906.task_manager.integration;
 
 import org.junit.jupiter.api.Test;
 
-public class InvalidTaskRequestExceptionTest extends HelperIntegrationTest{
+class InvalidTaskRequestExceptionTest extends HelperIntegrationTest{
 
     @Test
     void InvalidRequestFields() throws Exception{

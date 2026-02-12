@@ -7,9 +7,14 @@ import com.ibrakhim2906.task_manager.models.enums.TaskStatus;
 import com.ibrakhim2906.task_manager.repositories.TaskRepository;
 import com.ibrakhim2906.task_manager.repositories.UserRepository;
 import com.ibrakhim2906.task_manager.security.CurrentUser;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -18,19 +23,30 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class TaskServiceTest {
+
+    // mocks
+    @Mock
+    private TaskRepository taskRepository;
+
+    @Mock
+    private UserRepository userRepository;
+
+    @InjectMocks
+    private TaskService service;
+
+    private User me;
+
+    @BeforeEach
+    void setUp() {
+        me = new User();
+        me.setEmail("test@test.com");
+        me.setPasswordHash("676767");
+    }
 
     @Test
     void add_defaultStatusToDo_statusInNull() {
-        // mocks
-        TaskRepository taskRepository = mock(TaskRepository.class);
-        UserRepository userRepository = mock(UserRepository.class);
-
-        TaskService service = new TaskService(taskRepository, userRepository);
-
-        User me = new User();
-        me.setEmail("test@test.com");
-        me.setPasswordHash("676767");
 
         when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(me));
 
@@ -51,15 +67,6 @@ class TaskServiceTest {
 
     @Test
     void updateStatusThrow_whenSettingSameStatus() {
-        // mocks
-        TaskRepository taskRepository = mock(TaskRepository.class);
-        UserRepository userRepository = mock(UserRepository.class);
-
-        TaskService service = new TaskService(taskRepository, userRepository);
-
-        User me = new User();
-        me.setEmail("test@test.com");
-        me.setPasswordHash("676767");
 
         when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(me));
 

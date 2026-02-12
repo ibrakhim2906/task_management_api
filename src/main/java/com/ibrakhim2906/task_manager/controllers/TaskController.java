@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/tasks")
 public class TaskController {
 
+    private static final int DEFAULT_PAGE_SIZE=10;
+    private static final String DEFAULT_SORT_FIELD="id";
+
     private final TaskService taskService;
 
     @Autowired
@@ -38,7 +41,7 @@ public class TaskController {
     @GetMapping
     public Page<TaskResponse> getTasks(@RequestParam(required = false) TaskStatus status,
                                      @RequestParam(required = false) Boolean overdue,
-                                     @PageableDefault(size = 10, sort = "createdAt") Pageable pageable) {
+                                     @PageableDefault(size = DEFAULT_PAGE_SIZE, sort = DEFAULT_SORT_FIELD) Pageable pageable) {
         return taskService.getTasks(status, overdue, pageable);
     }
 
@@ -47,7 +50,7 @@ public class TaskController {
         return taskService.update(id, req.details(), req.dueDate(), req.status());
     }
 
-    @PutMapping("/{id}/status")
+    @PatchMapping("/{id}/status")
     public TaskResponse updateStatus(@PathVariable Long id, @Valid @RequestBody TaskStatusRequest req) {
         return taskService.updateStatus(id, req.status());
     }

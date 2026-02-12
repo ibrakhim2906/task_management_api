@@ -28,30 +28,58 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain
     ) throws ServletException, IOException {
-            String authHeader = request.getHeader("Authorization");
-
-            if (authHeader== null || !authHeader.startsWith("Bearer")) {
+            if (SecurityContextHolder.getContext().getAuthentication() != null) {
                 filterChain.doFilter(request, response);
                 return;
             }
 
-            String token = authHeader.substring(7);
+            String authHeader = request.getHeader("Authorization");
 
-            if (jwtService.isValid(token) && SecurityContextHolder.getContext().getAuthentication() == null) {
-                String email = jwtService.extractEmail(token);
+            if (authHeader== null || !authHeader.startsWith("Bearer ")) {
+                filterChain.doFilter(request, response);
+                return;
+            }
 
-                var auth = new UsernamePasswordAuthenticationToken(
-                        email,
-                        null,
-                        List.of()
-                );
+            String token = authHeader.substring(7).trim();
 
-                auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(auth);
+            // Empty token -> continue anonymous
+            if (token.isEmpty()) {
+                filterChain.doFilter(request, response);
+                return;
+            }
 
+            try {
+                if (jwtService.isValid(token)) {
+                    String email = jwtService.extractEmail(token);
+
+
+                    if (email != null && !email.isBlank()) {
+                        var auth = new UsernamePasswordAuthenticationToken(
+                                email,
+                                null,
+                                List.of()
+                        );
+                        auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                        SecurityContextHolder.getContext().setAuthentication(auth);
+                    }
+                }
+            } catch (Exception e) {
+
+                SecurityContextHolder.clearContext();
             }
 
             filterChain.doFilter(request, response);
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getServletPath();
+
+        return path.startsWith("/v3/api-docs")
+                || path.startsWith("/swagger-ui")
+                || path.equals("/swagger-ui.html")
+                || path.startsWith("/h2-console")
+                || path.startsWith("/auth"); // register/login
     }
 
 }

@@ -1,6 +1,7 @@
 package com.ibrakhim2906.task_manager.config;
 
 import com.ibrakhim2906.task_manager.security.JwtAuthFilter;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -13,6 +14,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 public class SecurityConfig {
+
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -27,9 +30,15 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/swagger-ui.html"
+                        ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/tasks/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/tasks/**").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/tasks/**").authenticated()
+                        .requestMatchers(HttpMethod.PATCH, "/tasks/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/tasks/**").authenticated()
                         .anyRequest().authenticated()
                 ).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

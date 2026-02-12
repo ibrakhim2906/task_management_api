@@ -23,7 +23,7 @@ class PaginationAndFilteringExceptionTest extends HelperIntegrationTest{
             createTask(token, "task-"+i, LocalDateTime.now().plusDays(10), "TODO");
         }
 
-        // act + assert (page 0 size 5 -> 5 times)
+        // (page 0 size 5 -> 2)
         mockMvc.perform(get("/tasks")
                         .header("Authorization", "Bearer "+token)
                 .param("page", "0")
@@ -55,8 +55,8 @@ class PaginationAndFilteringExceptionTest extends HelperIntegrationTest{
                 .param("status", "DONE")
                 .header("Authorization", "Bearer "+token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content.length").value(6))
-                .andExpect(jsonPath("%.content[*].status").
+                .andExpect(jsonPath("$.content.length()").value(6))
+                .andExpect(jsonPath("$.content[*].status").
                         value(Matchers.everyItem(Matchers.is("DONE"))));
     }
 

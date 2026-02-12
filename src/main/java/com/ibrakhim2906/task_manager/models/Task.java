@@ -2,7 +2,6 @@ package com.ibrakhim2906.task_manager.models;
 
 import com.ibrakhim2906.task_manager.models.enums.TaskStatus;
 import jakarta.persistence.*;
-import org.springframework.cglib.core.Local;
 
 import java.time.LocalDateTime;
 
@@ -94,6 +93,8 @@ public class Task {
     }
 
     public void setStatus(TaskStatus status) {
+        if (status == null) return;
+
         if (status == TaskStatus.IN_PROGRESS) {
             this.setInProgress();
         } else if (status == TaskStatus.DONE) {
@@ -115,5 +116,7 @@ public class Task {
         status=TaskStatus.TODO;
     }
 
-    public void setOwner(User owner) { this.owner = owner;}
+    public void setOwner(User owner) {
+        this.owner = owner;
+    }
 }
