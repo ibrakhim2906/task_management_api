@@ -1,0 +1,47 @@
+name: ci
+
+on:
+    push:
+        branches: ["main", "master"]
+    pull_request:
+        branches: ["main", "master"]
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        services:
+            postgres:
+                image: postgres:16
+                env:
+                    POSTGRES_DB: taskdb
+                    POSTGRES_USER: postgres
+                    POSTGRES_PASSWORD: password
+                ports:
+                    - 5432:5432
+                options: >-
+                    --health-cmd="pg_isready -U postgres -d taskdb"
+                    --health-interval=10s
+                    --health-timeout=5s
+                    --health-retries=5
+
+        env:
+            SPRING_PROFILES_ACTIVE: test
+            JWT_SECRET: 7e8d5c9b2f0a1e4c8b7d6f5e3c2a1b0f9d8c7e6f5a4b3c2d1e0f9a8b7c6d5e4
+            DB_URL: jdbc:postgresql://localhost:5432/taskdb
+            DB_USER: postgres
+            DB_PASSWORD: password
+
+        steps:
+            - name: checkout repository
+              uses: actions/checkout@v4
+
+            - name: setup jdk
+              uses: actions/setup-java@v4
+              with:
+                  distribution: temurin
+                  java-version: 17
+                  cache: maven
+
+            - name: build and test
+              run: ./mvnw clean verify

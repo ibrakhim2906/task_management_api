@@ -1,115 +1,176 @@
-# task manager api
+# task management API
 
-task management rest api with jwt authentication, ownership isolation and task lifecycle.
+REST API for task management built with **Spring Boot**.  
+provides jwt authentication, user ownership isolation, and task lifecycle management.
 
-tech stack implemented - java 17+, spring (boot, security, data jpa/hibernate), postgresql, flyway,
-h2 (testing). build helper - maven.
+---
 
-features: user register/login with jwt, tasks crud (proper task workflow included).
-db data access/modification is being optimized via pagination and filtering. flyway is being used for proper db migration.
+## tech Stack
 
-## documentation
-### how to run it
+- java 17
+- spring boot
+- spring security (jwt auth)
+- spring data JPA / hibernate
+- postgresql
+- flyway (database migrations)
+- h2 database (testing)
+- maven
 
-clone repository
+---
+
+## features
+
+- user registration and authentication using jwt
+- secure user-scoped task management
+- full CRUD operations for tasks
+- task status workflow management
+- pagination and filtering support
+- database versioning with Flyway
+- unit and integration tests
+- openAPI / swagger documentation
+
+---
+
+## getting started
+
+### requirements
+
+make sure you have installed:
+
+- java 17+
+- postgreSQL
+- git
+
+maven wrapper included
+
+---
+
+## 1. clone Repository
 
 ```bash
-git clone https://github.com/ibrakhim2906/task_management_api.git <p>
+git clone https://github.com/ibrakhim2906/task_management_api.git
 cd task_management_api
 ```
 
-set environmental variables
+---
+
+## 2. configure Environment Variables
+
+create `.env` file based on the provided example:
 
 ```bash
-export JWT_SECRET=your-32-character-secret-key-here
-export DB_URL=jdbc:postgresql://localhost:5432/taskdb
-export DB_USER=postgres
-export DB_PASSWORD=yourpassword
+cp .env.example .env
 ```
 
-run the application
+example configuration:
+
+```
+JWT_SECRET=your-32-character-secret-key
+DB_URL=jdbc:postgresql://localhost:5432/taskdb
+DB_USER=postgres
+DB_PASSWORD=password
+```
+
+---
+
+## 3. run Application
+
+linux / macOS:
+
 ```bash
-mvn spring-boot:run
+./mvnw spring-boot:run
 ```
 
-access swagger ui
+windows:
+
 ```bash
-http://localhost:8080/swagger-ui.html
+mvnw.cmd spring-boot:run
 ```
 
+---
 
+## 4. open swagger UI
 
+after starting the application:
 
-### api overview
+```
+http://localhost:8080/swagger-ui/index.html
+```
 
-users: <p>
-POST /auth/register → user registration<p>
-POST /auth/login → user credentials are entered, jwt token <p>
-tasks: <p>
-POST /tasks → creating new task (all task requests are user isolated and need proper token of ownership) <p>
-GET /tasks → get tasks (filtering by status and due date + pagination and filtering parameters) <p>
-PUT /tasks/{id} → updating task information <p>
-PATCH /tasks/{id}/status → changing task status <p>
-DELETE /tasks/{id} → delete tasks (again, ownership required) <p>
+---
 
-### authentication flow: 
-register→login→receive jwt→use header (Authorization: Bearer 'token')
+## authentication flow
 
-### environment variables
-JWT_SECRET - 32 digit randomly generated key for correct jwt usage <p>
-DB_URL - url address that connects to db local server
-DB_USER - default login name to connect to db
-DB_PASSWORD - default password name to connect to db
+1. register a user  
+2. login  
+3. receive JWT token  
+4. use token in requests:
 
-### testing
+```
+Authorization: Bearer <token>
+```
 
-some tests were included already, room for expansion of tests exists.<p>
+---
 
-explaining every test would be quite verbose, <p> all the needed information can be found through logs by running
+## API overview
 
-`mvn test`
+### authentication
 
-### additional examples of requests
+| method | endpoint | description |
+|--------|----------|-------------|
+| POST | `/auth/register` | register user |
+| POST | `/auth/login` | login and receive jwt |
 
-#### login
+### tasks
+
+| method | endpoint | description |
+|--------|----------|-------------|
+| POST | `/tasks` | create task |
+| GET | `/tasks` | get tasks (pagination & filtering) |
+| PUT | `/tasks/{id}` | update task |
+| PATCH | `/tasks/{id}/status` | change task status |
+| DELETE | `/tasks/{id}` | delete task |
+
+---
+
+## running tests
+
+```bash
+./mvnw test
+```
+
+---
+
+## example requests
+
+### login
 
 ```bash
 curl -X POST http://localhost:8080/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "user@example.com",
-    "password": "password123"
-  }'
+-H "Content-Type: application/json" \
+-d '{"email":"user@example.com","password":"password123"}'
 ```
 
-#### create task
+---
+
+### create task
+
 ```bash
 curl -X POST http://localhost:8080/tasks \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN_HERE" \
-  -d '{
-    "details": "info",
-    "dueDate": "2026-03-01T12:00:00",
-    "status": "TODO"
-  }'
+-H "Authorization: Bearer YOUR_TOKEN" \
+-H "Content-Type: application/json" \
+-d '{
+  "details":"Example task",
+  "dueDate":"2026-03-01T12:00:00",
+  "status":"TODO"
+}'
 ```
 
-#### list tasks
+---
+
+### get tasks
+
 ```bash
 curl -X GET "http://localhost:8080/tasks?page=0&size=10" \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN_HERE"
+-H "Authorization: Bearer YOUR_TOKEN"
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-

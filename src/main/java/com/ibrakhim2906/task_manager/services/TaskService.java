@@ -1,6 +1,5 @@
 package com.ibrakhim2906.task_manager.services;
 
-
 import com.ibrakhim2906.task_manager.dtos.TaskResponse;
 import com.ibrakhim2906.task_manager.exceptions.InvalidTaskStateException;
 import com.ibrakhim2906.task_manager.exceptions.TaskNotFoundException;
@@ -11,14 +10,13 @@ import com.ibrakhim2906.task_manager.repositories.TaskRepository;
 import com.ibrakhim2906.task_manager.repositories.UserRepository;
 import com.ibrakhim2906.task_manager.security.CurrentUser;
 import jakarta.transaction.Transactional;
+import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.time.LocalDateTime;
 
 @Service
 public class TaskService {
@@ -27,7 +25,10 @@ public class TaskService {
     private final UserRepository userRepository;
 
     @Autowired
-    public TaskService(TaskRepository taskRepository, UserRepository userRepository) {
+    public TaskService(
+        TaskRepository taskRepository,
+        UserRepository userRepository
+    ) {
         this.taskRepository = taskRepository;
         this.userRepository = userRepository;
     }
@@ -38,11 +39,20 @@ public class TaskService {
         String email = CurrentUser.email();
 
         if (email == null) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authenticated");
+            throw new ResponseStatusException(
+                HttpStatus.UNAUTHORIZED,
+                "Not authenticated"
+            );
         }
 
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
+        return userRepository
+            .findByEmail(email)
+            .orElseThrow(() ->
+                new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "User not found"
+                )
+            );
     }
 
     /**
@@ -61,7 +71,6 @@ public class TaskService {
         taskRepository.save(task);
 
         return TaskResponse.from(task);
-
     }
 
     /**
@@ -71,9 +80,12 @@ public class TaskService {
      * @param status Initial status (default TODO)
      * @return TaskResponse with task information
      */
-    public TaskResponse add(String details, LocalDateTime dueDate, TaskStatus status) {
+    public TaskResponse add(
+        String details,
+        LocalDateTime dueDate,
+        TaskStatus status
+    ) {
         User me = requireCurrentUser();
-
 
         Task task = new Task();
         task.setDetails(details);
@@ -95,8 +107,9 @@ public class TaskService {
     public TaskResponse get(Long id) {
         User me = requireCurrentUser();
 
-        Task task = taskRepository.findByIdAndOwner(id, me)
-                .orElseThrow(() -> new TaskNotFoundException(id));
+        Task task = taskRepository
+            .findByIdAndOwner(id, me)
+            .orElseThrow(() -> new TaskNotFoundException(id));
 
         return TaskResponse.from(task);
     }
@@ -108,19 +121,31 @@ public class TaskService {
      * @param pageable Pagination
      * @return Page of TaskResponse - list of tasks requested
      */
-    public Page<TaskResponse> getTasks(TaskStatus status, Boolean overdue, Pageable pageable) {
+    public Page<TaskResponse> getTasks(
+        TaskStatus status,
+        Boolean overdue,
+        Pageable pageable
+    ) {
         User me = requireCurrentUser();
 
         if (Boolean.TRUE.equals(overdue)) {
-            return taskRepository.findByOwnerAndStatusAndDueDateBefore(me, TaskStatus.TODO, LocalDateTime.now(), pageable).map(TaskResponse::from);
+            return taskRepository
+                .findByOwnerAndStatusAndDueDateBefore(
+                    me,
+                    TaskStatus.TODO,
+                    LocalDateTime.now(),
+                    pageable
+                )
+                .map(TaskResponse::from);
         }
 
-        if (status!=null) {
-            return taskRepository.findByOwnerAndStatus(me, status, pageable).map(TaskResponse::from);
+        if (status != null) {
+            return taskRepository
+                .findByOwnerAndStatus(me, status, pageable)
+                .map(TaskResponse::from);
         }
 
         return taskRepository.findByOwner(me, pageable).map(TaskResponse::from);
-
     }
 
     /**
@@ -132,19 +157,36 @@ public class TaskService {
      * @return TaskResponse with information of updated task (same id)
      */
     @Transactional
-    public TaskResponse update(Long id, String details, LocalDateTime dueDate, TaskStatus taskStatus) {
+    public TaskResponse update(
+        Long id,
+        String details,
+        LocalDateTime dueDate,
+        TaskStatus taskStatus
+    ) {
         User me = requireCurrentUser();
 
-        Task existing = taskRepository.findByIdAndOwner(id, me).orElseThrow(() -> new TaskNotFoundException(id));
+        Task existing = taskRepository
+            .findByIdAndOwner(id, me)
+            .orElseThrow(() -> new TaskNotFoundException(id));
 
-        if (dueDate!=null && dueDate.isBefore(LocalDateTime.now())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Due date cannot be in the past");
+        if (details != null && !details.isBlank()) {
+            existing.setDetails(details);
         }
 
-        existing.setDetails(details);
-        existing.setDueDate(dueDate);
-        existing.setStatus(taskStatus);
+        if (dueDate != null) {
+            if (dueDate.isBefore(LocalDateTime.now())) {
+                throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Due date cannot be in the past"
+                );
+            }
+            existing.setDueDate(dueDate);
+        }
 
+        if (taskStatus != null) {
+            validateStatusTransition(existing.getStatus(), taskStatus);
+            existing.setStatus(taskStatus);
+        }
 
         return TaskResponse.from(existing);
     }
@@ -159,8 +201,9 @@ public class TaskService {
     public TaskResponse updateStatus(Long id, TaskStatus status) {
         User me = requireCurrentUser();
 
-        Task existing = taskRepository.findByIdAndOwner(id, me)
-                .orElseThrow(() -> new TaskNotFoundException(id));
+        Task existing = taskRepository
+            .findByIdAndOwner(id, me)
+            .orElseThrow(() -> new TaskNotFoundException(id));
 
         if (existing.getStatus() == status) {
             throw new InvalidTaskStateException(id);
@@ -171,6 +214,28 @@ public class TaskService {
         return TaskResponse.from(existing);
     }
 
+    private void validateStatusTransition(TaskStatus current, TaskStatus next) {
+        if (current == next) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Task already has status " + current
+            );
+        }
+
+        if (
+            current == TaskStatus.TODO && next == TaskStatus.IN_PROGRESS
+        ) return;
+
+        if (
+            current == TaskStatus.IN_PROGRESS && next == TaskStatus.DONE
+        ) return;
+
+        throw new ResponseStatusException(
+            HttpStatus.BAD_REQUEST,
+            "Invalid status transition: " + current + " -> " + next
+        );
+    }
+
     /**
      * Delete specific user task based on ID
      * @param id ID of the task to be deleted
@@ -178,8 +243,14 @@ public class TaskService {
     public void delete(Long id) {
         User me = requireCurrentUser();
 
-        Task existing = taskRepository.findByIdAndOwner(id, me)
-                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found"));
+        Task existing = taskRepository
+            .findByIdAndOwner(id, me)
+            .orElseThrow(() ->
+                new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Task not found"
+                )
+            );
 
         taskRepository.delete(existing);
     }
